@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,5 +49,10 @@ Route::get('/home', [ProductoController::class, 'index'])->name('home');
 Route::group(['middleware'=>'auth'], function(){
     Route::get('/',[ProductoController::class, 'index'])->name('home');
 });
+
+//Indicadores
+Route::get('/indicadores', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('indicadores.index');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

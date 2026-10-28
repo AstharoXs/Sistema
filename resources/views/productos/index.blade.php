@@ -8,6 +8,32 @@
         </div>
     @endif
 
+    <form method="GET" action="{{route('productos.index')}}">
+        <label for="buscar">Nombre del producto</label>
+        <input type="text" name="buscar" id="buscar" value="{{request('buscar')}}">
+        <label for="id_categoria">Categoria</label>
+        <select name="id_categoria" id="id_categoria">
+            <option value="">Todas las categorias</option>
+            @foreach ($categorias as $categoria)
+                <option value="{{$categoria->id}}" @selected(request('id_categoria') == $categoria->id)>
+                    {{$categoria->nom_categoria}}
+                </option>
+            @endforeach
+        </select>
+
+        <label for="estado_producto">Estado</label>
+        <select name="estado_producto" id="estado_producto">
+            <option value="">Todos</option>
+            <option value="activo" @selected(request('estado_producto') === '1')>Activos</option>
+            <option value="inactivo" @selected(request('estado_producto') === '0')>Inactivos</option>
+        </select>
+
+        <button type="submit" class="btn btn-info">Buscar</button>
+        |
+        <a href="{{route('productos.index')}}" class="btn btn-warning">Limpiar</a>
+    </form>
+    <br>
+    <br>
     <table class="table table-light">
         <thead class="thead-light">
             <h1>Lista de datos de los productos</h1>
@@ -53,6 +79,10 @@
     <br>
     <a href="{{url('/productos/create')}}" class="btn btn-success">
         Registrar Nuevo Producto
+    </a>
+    |
+    <a href="{{url('/indicadores/')}}" class="btn btn-success">
+        Indicadores
     </a>
     <br>
     <br>

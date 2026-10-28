@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProductoRequest;
+use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Producto;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
@@ -12,13 +14,43 @@ class ProductoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $productos = Producto::paginate(3);
-        $categorias = Categoria::all();
+        $consulta = Producto::query()->with('categoria');
 
-        return view('productos.index', compact('productos', 'categorias'));
+        if ($request->filled('buscar')) {
+            $consulta->where(
+                'nom_producto',
+                'like',
+                '%'. $request->input('buscar').'%'
+            );
+        }
+
+        if ($request->filled('id_categoria')) {
+            $consulta->where(
+                'id_categoria',
+                $request->input('id_categoria')
+            );
+        }
+
+        if ($request->filled('estado_producto')) {
+            $consulta->where(
+                'estado_producto',
+                $request->input('estado_producto')
+            );
+        }
+
+        $productos = $consulta->orderBy('nom_producto')
+            ->paginate(3)
+            ->withQueryString();
+        
+        $categorias = Categoria::orderBy('nom_categoria')->get();
+
+        return view(
+            'productos.index',
+            compact('productos', 'categorias')
+        );
 
     }
 
@@ -43,37 +75,19 @@ class ProductoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductoRequest $request)
     {
-        $msj = [
-            'require' => 'El :attribute es requerido',
-            'foto_producto.require' => 'La foto es requerida',
-            'id_categoria.exists' => 'La categoría seleccionada no existe',
-            'estado_producto.in' => 'El estado seleccionado no es válido'
-        ];
-        
-        $datosProducto = $request->validate([
-            'nom_producto' => ['required', 'string', 'max:100'],
-            'detalle_producto' => ['required', 'string', 'max:100'],
-            'cant_producto' => ['required', 'numeric', 'min:0'],
-            'valor_producto' => ['required', 'numeric', 'min:0'],
-            'foto_producto' => ['required', 'image', 'max:10048'],
-            'estado_producto' => ['required', 'in:activo,inactivo', 'max:10048'],
-            'id_categoria' => ['required', 'exists:categorias,id'],
-        ], $msj);
-
-        // $datosProducto = request()->all();
-        $datosProducto = request()->except('_token');
+        $datos = $request->validated();
 
         if ($request->hasFile('foto_producto')) {
-            $datosProducto['foto_producto']=$request->file('foto_producto')->store('uploads','public');
+            $datos['foto_producto'] = $request
+                ->file('foto_producto')
+                ->store('productos', 'public');
         }
-
         
+        Producto::create($datos);
 
-        Producto::insert($datosProducto);
-        // return response()->json($datosProducto);
-        return redirect('productos')->with('mensaje','Registro ingresado con exito.');
+        return redirect()->route('productos.index')->with('success','Registro ingresado con exito.');
     }
 
     /**
@@ -89,7 +103,7 @@ class ProductoController extends Controller
      */
     public function edit($id)
     {
-        //Ñ
+        //
         $producto = Producto::findOrFail($id);
         $categorias = Categoria::all();
         $modo = 'Editar';
@@ -104,38 +118,20 @@ class ProductoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProductoRequest $request, Producto $producto)
     {
-        $msj = [
-            'require' => 'El :attribute es requerido',
-            'foto_producto.require' => 'La foto es requerida',
-            'id_categoria.exists' => 'La categoría seleccionada no existe',
-            'estado_producto.in' => 'El estado seleccionado no es válido'
-        ];
-        
-        $datosProducto = $request->validate([
-            'nom_producto' => ['required', 'string', 'max:100'],
-            'detalle_producto' => ['required', 'string', 'max:100'],
-            'cant_producto' => ['required', 'numeric', 'min:0'],
-            'valor_producto' => ['required', 'numeric', 'min:0'],
-            'foto_producto' => ['required', 'image', 'max:10048'],
-            'estado_producto' => ['required', 'in:activo,inactivo', 'max:10048'],
-            'id_categoria' => ['required', 'exists:categorias,id'],
-        ], $msj);
+        $datos = $request->validated();
 
-        if ($request->hasFile('foto_producto')){
-            $validacion['foto_producto'] = 'require|max:10000|mimes:jpg,png,jpeg';
-            $msj['foto_producto.required'] = 'La Foto es requerida';
+        if ($request->hasFile('foto_producto')) {
+            $datos['foto_producto'] = $request
+                ->file('foto_producto')
+                ->store('productos', 'public');
+        } else {
+            unset($datos['foto_producto']);
         }
 
-        $datos = request()->except(['_token','_method']);
-        if($request->hasFile('foto_producto')){
-            $datos['foto_producto']=$request->file('foto_producto')->store('uploads','public');
-        }
-
-        Producto::where('id','=',$id)->update($datos);
-        $productos = Producto::findOrFail($id);
-        return redirect('productos')->with('mensaje','Registro actualizado correctamente.');
+        $producto->update($datos);
+        return redirect()->route('productos.index')->with('success','Registro actualizado correctamente.');
     }
 
     /**
