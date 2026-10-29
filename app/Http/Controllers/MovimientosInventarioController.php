@@ -15,9 +15,9 @@ class MovimientosInventarioController extends Controller
      */
     public function index()
     {
-        $movimientos = MovimientoInventario::with(
+        $movimientos = MovimientosInventario::with(
             ['producto', 'usuario']
-        )->lates()->paginate(5);
+        )->latest()->paginate(10);
 
         return view('movimientos.index', compact('movimientos'));
     }
@@ -29,7 +29,7 @@ class MovimientosInventarioController extends Controller
     {
         $productos = Producto::orderBy('nom_producto')->get();
 
-        return view('movimientos.index', compact('productos'));
+        return view('movimientos.create', compact('productos'));
     }
 
     /**
@@ -66,7 +66,7 @@ class MovimientosInventarioController extends Controller
 
             $producto->save();
 
-            MovimientoInventario::create([
+            MovimientosInventario::create([
                 'id_producto' => $producto->id,
                 'usuario_id' => auth()->id(),
                 'tipo' => $datos['tipo'],
@@ -75,7 +75,7 @@ class MovimientosInventarioController extends Controller
             ]);
         });
 
-        return redirect('movimientos')->route('movimientos.index')
+        return redirect()->route('movimientos.index')
             ->with('success', 'Movimiento registrado correctamente.');
     }
 

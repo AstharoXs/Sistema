@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MovimientosInventario extends Model
 {
-    protected $table = 'movimientos_inventario';
+    protected $table = 'movimientos_inventarios';
 
     protected $fillable = [
         'id_producto',

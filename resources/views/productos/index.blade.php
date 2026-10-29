@@ -62,9 +62,11 @@
                 <td>{{$datos->estado_producto}}</td>
                 <td>{{$datos->categoria?->nom_categoria ?? 'Sin Categoria'}}</td>
                 <td>
-                    <a href="{{url('/productos/'.$datos->id. '/edit')}}" class="btn btn-warning">
+                    @if (in_array(auth()->user()->rol, ['administrador', 'inventario']))
+                    <a href="{{route('productos.edit', $datos)}}" class="btn btn-warning">
                         Editar
-                    </a> 
+                    </a>
+                    @endif
                     |   
                     <form action="{{url('/productos/'.$datos->id)}}" method="post" class="d-inline">
                         @csrf
@@ -77,9 +79,11 @@
         </tbody>
     </table>
     <br>
-    <a href="{{url('/productos/create')}}" class="btn btn-success">
+    @if (in_array(auth()->user()->rol, ['administrador', 'inventario']))
+    <a href="{{route('productos.create')}}" class="btn btn-success">
         Registrar Nuevo Producto
     </a>
+    @endif
     |
     <a href="{{url('/indicadores/')}}" class="btn btn-success">
         Indicadores

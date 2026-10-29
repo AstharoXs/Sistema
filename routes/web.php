@@ -5,6 +5,7 @@ use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MovimientosInventarioController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,17 +43,41 @@ Route::group(['middleware'=>'auth'], function(){
 });
 
 //Productos
-Route::resource('productos', ProductoController::class);
-Auth::routes(['register'=>false, 'reset'=>false]);
+Route::middleware('auth')->group(function () {
+    Route::get('/productos', [ProductoController::class, 'index'])
+        ->middleware('rol:administrador,inventario,consulta')
+        ->name('productos.index');
 
-Route::get('/home', [ProductoController::class, 'index'])->name('home');
-Route::group(['middleware'=>'auth'], function(){
-    Route::get('/',[ProductoController::class, 'index'])->name('home');
+    Route::get('/productos/create', [ProductoController::class, 'create'])
+        ->middleware('rol:administrador,inventario')
+        ->name('productos.create');
+    
+    Route::post('/productos', [ProductoController::class, 'store'])
+        ->middleware('rol:administrador,inventario')
+        ->name('productos.store');
+
+    Route::get('/productos/{producto}/edit', [ProductoController::class, 'edit'])
+        ->middleware('rol:administrador,inventario')
+        ->name('productos.edit');
+
+    Route::put('/productos/{producto}', [ProductoController::class, 'update'])
+        ->middleware('rol:administrador,inventario')
+        ->name('productos.update');
+
+    Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])
+        ->middleware('rol:administrador,inventario')
+        ->name('productos.destroy');
 });
 
 //Indicadores
 Route::get('/indicadores', [DashboardController::class, 'index'])
     ->middleware('auth')
     ->name('indicadores.index');
+
+//Movimientos
+Route::middleware('auth')->group(function () {
+    Route::resource('movimientos', MovimientosInventarioController::class)
+        ->only(['index', 'create', 'store']);
+});
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -22,21 +22,28 @@
         </thead>
 
         <tbody>
-            @foreach ($categorias as $datos)
+            @forelse ($movimientos as $movimiento)
             <tr>
-                <td>{{$datos->id}}</td>
-                <td>{{$datos->nom_categoria}}</td>
-                <td></td>
+                <td>{{$movimiento->producto?->nom_producto ?? 'Sin producto'}}</td>
+                <td>{{$movimiento->tipo}}</td>
+                <td>{{$movimiento->cantidad}}</td>
+                <td>{{$movimiento->usuario?->name ?? 'Sin usuario'}}</td>
+                <td>{{$movimiento->observacion}}</td>
+                <td>{{$movimiento->created_at}}</td>
             </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="2">No hay movimientos registrados.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
     <br>
-    <a href="{{url('/categorias/create')}}" class="btn btn-success">
-        Registrar Nueva Categoria
+    <a href="{{url('/movimientos/create')}}" class="btn btn-success">
+        Registrar nuevo movimiento
     </a>
     <br>
     <br>
-    {!! $categorias->Links() !!}
+    {!! $movimientos->Links() !!}
 </div>
 @endsection
