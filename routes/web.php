@@ -5,6 +5,8 @@ use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\VentaController;
 use App\Http\Controllers\MovimientosInventarioController;
 
 Route::get('/', function () {
@@ -77,6 +79,15 @@ Route::get('/indicadores', [DashboardController::class, 'index'])
 //Movimientos
 Route::middleware('auth')->group(function () {
     Route::resource('movimientos', MovimientosInventarioController::class)
+        ->only(['index', 'create', 'store']);
+});
+
+//Ventas
+Route::middleware('auth')->group(function () {
+    Route::resource('clientes', ClienteController::class)
+        ->except(['show']);
+
+    Route::resource('ventas', VentaController::class)
         ->only(['index', 'create', 'store']);
 });
 

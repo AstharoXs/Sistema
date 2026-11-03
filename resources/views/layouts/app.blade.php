@@ -45,6 +45,10 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{url('/movimientos')}}">Movimientos de Inventario</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url('/ventas')}}">Ventas</a>
+                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
